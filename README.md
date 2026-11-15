@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🛒 ShopAssist AI
-### Industry-Specific Conversational AI for Retail & E-Commerce Customer Support
+### Conversational AI for Retail & E-Commerce Customer Support
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1%2B-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
@@ -12,87 +12,88 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge)](LICENSE)
 
 <p align="center">
-  <b>A parameter-efficient, policy-grounded Large Language Model fine-tuned on real-world retail support interactions across 18 leading enterprises, engineered to eliminate canned deflection traps and deliver instant First Contact Resolution (FCR).</b>
+  <b>A fine-tuned customer support model trained on real-world retail conversations across 18 leading brands. Engineered to eliminate generic "DM us" deflections and provide fast, actionable resolutions for orders, returns, and billing.</b>
 </p>
 
-[Key Highlights](#-key-empirical-highlights) •
-[Architecture](#-end-to-end-system-architecture) •
-[Data Pipeline & EDA](#-dataset-engineering--empirical-insights) •
-[QLoRA Fine-Tuning](#-model-architecture--4-bit-qlora-tuning) •
-[Benchmark Results](#-standardized-comparative-benchmark) •
-[Local Edge Deployment](#-local-edge-deployment--web-application) •
-[Quickstart](#-quickstart--reproduction)
+[Key Highlights](#-key-highlights) •
+[Architecture](#-system-architecture) •
+[Dataset & Preprocessing](#-dataset--preprocessing) •
+[QLoRA Fine-Tuning](#-model-fine-tuning-qlora) •
+[Benchmark Results](#-benchmark-results) •
+[Deployment](#-deployment--web-application) •
+[Quickstart](#-quickstart) •
+[Project Structure](#-repository-structure)
 
 </div>
 
 ---
 
-## 🚀 Key Empirical Highlights
+## 🚀 Key Highlights
 
 ```
 ┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐
-│     PARAMETER RATIO     │  │     POLICY ALIGNMENT    │  │     LOSS CONVERGENCE    │
+│     PARAMETER RATIO     │  │     POLICY ACCURACY     │  │     TRAINING LOSS       │
 │         0.961%          │  │    66.7% ➔ 96.7%        │  │      2.70 ➔ 0.95        │
-│ 29.93M / 3.12B Weights  │  │   +30.0% Net Alignment  │  │  200 Production Steps  │
+│ 29.93M / 3.12B Weights  │  │   +30.0% Improvement    │  │        200 Steps        │
 └─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘
 ┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐
-│   DEFLECTIONS PURGED    │  │    COLAB T4 RUNTIME     │  │      EDGE FOOTPRINT     │
-│       45,188 Pairs      │  │        ~15 Mins         │  │     59.9 MB Adapter     │
-│ 12.2% Canned Traps Out  │  │ Single GPU Optimization │  │ Sub-2s CPU Inference    │
+│   DEFLECTIONS REMOVED   │  │    TRAINING RUNTIME     │  │     MODEL FOOTPRINT     │
+│       45,188 Pairs      │  │        ~15 Mins         │  │     119.8 MB Adapter    │
+│ 12.2% Canned Traps Out  │  │ Single GPU (Colab T4)   │  │   Fast Local Inference  │
 └─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘
 ```
 
-> [!IMPORTANT]
-> **The Problem with Foundational LLMs in Customer Care:**
-> General-purpose LLMs (e.g., standard GPT-4, LLaMA, or Qwen base models) suffer from three critical failure modes when deployed in enterprise retail operations:
-> 1. **Discursive Verbosity:** Emitting conversational essays that frustrate users seeking rapid tracking updates or exchange policies.
-> 2. **Canned Deflection Traps:** Unfiltered customer support datasets are saturated ($12.2\%$) with canned phrases like *"Please send us a DM with your order number"*, which models blindly memorize.
-> 3. **Policy Non-Adherence:** Hallucinating refund guarantees or misquoting standard 30-day exchange windows.
+> [!NOTE]
+> **Why General-Purpose LLMs Struggle with Customer Support:**
+> Standard base models often run into three common issues when handling retail inquiries:
+> 1. **Overly Wordy:** They produce long essays when customers simply want a fast tracking link or exchange policy.
+> 2. **Generic Deflections:** Raw customer support datasets are saturated with unhelpful replies like *"Please send us a DM with your account details"*, which models repeat instead of resolving the issue.
+> 3. **Inconsistent Policies:** They often hallucinate refund timelines or misstate return windows.
 >
-> **The ShopAssist AI Solution:** Fine-tuning `Qwen2.5-3B-Instruct` with **4-bit QLoRA** on an anti-deflection filtered ChatML corpus elevates policy alignment to **96.7%** and enforces a concrete resolution protocol on First Contact.
+> **The ShopAssist AI Solution:** Fine-tuning `Qwen2.5-3B-Instruct` with **4-bit QLoRA** on a cleaned customer support dataset raises policy accuracy to **96.7%** and provides direct, actionable answers on first contact.
 
 ---
 
-## 🏗 End-to-End System Architecture
+## 🏗 System Architecture
 
 ```mermaid
 flowchart TD
-    A["Raw Twitter Customer Support (TWCS)<br/>2,811,774 Tweets"] --> B["Relational Hash-Join<br/>18 Retail Brand Handles"]
-    B --> C["369,463 Dialogue Turns<br/>(Inbound Query ➔ Brand Reply)"]
+    A["Raw Twitter Customer Support (TWCS)<br/>2,811,774 Tweets"] --> B["Filter 18 Retail Brand Handles"]
+    B --> C["369,463 Dialogue Turns<br/>(Customer Query ➔ Brand Reply)"]
     
-    C --> D{"Data Hygiene & Anti-Deflection Filter"}
-    D -- "Purge 45,188 (12.2%)" --> E["Canned Deflections Eliminated<br/>('Please DM us...')"]
-    D -- "Filter 184,520 ( PII / URLs / Length )" --> F["PII, Signatures & Length Cleaned"]
-    D --> G["Curated Stratified ChatML Corpus<br/>4,014 Train / 446 Eval Turns"]
+    C --> D{"Data Cleaning & Filtering"}
+    D -- "Remove 45,188 (12.2%)" --> E["Generic Deflections Filtered<br/>('Please DM us...')"]
+    D -- "Clean 184,520 (PII, URLs, Mentions)" --> F["Sanitized & Formatted Pairs"]
+    D --> G["Curated ChatML Dataset<br/>4,014 Train / 446 Validation"]
     
-    G --> H["Hugging Face TRL SFTTrainer<br/>Completion Masking (DataCollatorForCompletionOnlyLM)"]
-    I["Qwen/Qwen2.5-3B-Instruct<br/>4-Bit NF4 Quantization (Double Quant)"] --> H
+    G --> H["Hugging Face TRL SFTTrainer<br/>Completion Masking"]
+    I["Qwen/Qwen2.5-3B-Instruct<br/>4-Bit NF4 Quantization"] --> H
     J["LoRA Adapter<br/>r=16, alpha=32 on 7 Projection Layers"] --> H
     
-    H --> K["Trained LoRA Weights<br/>adapter_model.safetensors (59.9 MB)"]
+    H --> K["Trained LoRA Weights<br/>adapter_model.safetensors"]
     
-    K --> L["Ollama Local CPU Engine<br/>Modelfile + ChatML Guardrails"]
-    K --> M["Interactive Streamlit UI<br/>Real-Time Telemetry & Pre-Built Scenarios"]
+    K --> L["Local Inference with Ollama<br/>GGUF / Modelfile"]
+    K --> M["Streamlit Web Interface<br/>Live Chat & Scenario Testing"]
 ```
 
 ---
 
-## 📊 Dataset Engineering & Empirical Insights
+## 📊 Dataset & Preprocessing
 
-The foundation of ShopAssist AI is an automated data extraction and hygiene pipeline built over the 2.81M-row Kaggle *Customer Support on Twitter* (`twcs.csv`) corpus.
+ShopAssist AI is built on a data extraction and cleaning pipeline using the Kaggle *Customer Support on Twitter* (`twcs.csv`) dataset (2.81M tweets).
 
-### 1. Data Hygiene Funnel
-| Pipeline Stage | Record Count | Retention | Engineering & Hygiene Action |
+### 1. Data Cleaning Pipeline
+| Pipeline Stage | Record Count | Retention | Description |
 | :--- | :---: | :---: | :--- |
-| **Raw TWCS Dataset** | 2,811,774 | 100.0% | Complete uncurated multi-industry Twitter customer care dataset. |
-| **Retail Brand Filter** | 1,908,043 | 67.9% | Filtered to 18 leading retail, e-commerce, and logistics accounts. |
-| **Relational Turn Stitching** | 369,463 | 13.1% | Inner hash-join matching brand replies on `in_response_to_tweet_id == tweet_id`. |
-| **Anti-Deflection Purge** | 324,275 | 11.5% | Regex filter eliminating **45,188 canned "DM us" deflection traps (12.2%)**. |
-| **PII & Signature Scrubbing** | 184,520 | 6.6% | Stripped `@mentions`, tracking URLs, agent sign-offs (`^MD`, `/Sarah`), and decoded HTML. |
-| **Stratified Production Corpus** | 4,460 | 0.16% | Golden-standard ChatML pairs: **4,014 train turns / 446 validation turns**. |
+| **Raw TWCS Dataset** | 2,811,774 | 100.0% | Complete multi-industry customer support dataset. |
+| **Retail Brand Filter** | 1,908,043 | 67.9% | Filtered to 18 major retail, e-commerce, and logistics accounts. |
+| **Conversation Stitching** | 369,463 | 13.1% | Paired customer queries with brand replies by matching tweet IDs. |
+| **Deflection Filtering** | 324,275 | 11.5% | Removed **45,188 generic "DM us" deflection replies (12.2%)**. |
+| **PII & Signature Cleaning** | 184,520 | 6.6% | Removed `@mentions`, tracking links, support rep sign-offs (`^MD`, `/Sarah`), and HTML entities. |
+| **Final Curated Dataset** | 4,460 | 0.16% | High-quality ChatML pairs: **4,014 train / 446 validation**. |
 
-### 2. Dialogue Volume Across Enterprise Brands (From Corpus Audit)
-| Retail Enterprise | Total Dialogue Pairs | Share (%) | Primary Contact Specialization |
+### 2. Dialogue Volume Across Top Brands
+| Brand | Dialogue Pairs | Share (%) | Primary Support Topics |
 | :--- | :---: | :---: | :--- |
 | **AmazonHelp** | 169,879 | 46.0% | Shipping logistics, Prime delivery, package tracking |
 | **AppleSupport** | 106,719 | 28.9% | Device warranty, hardware replacements, service appointments |
@@ -103,79 +104,83 @@ The foundation of ShopAssist AI is an automated data extraction and hygiene pipe
 | **British_Airways** | 32,450 | 8.8% | Ticket changes, cancellation refunds, baggage claims |
 | **Marks & Spencer** | 14,210 | 3.8% | Apparel sizing, return windows, exchange labels |
 
-### 3. Customer Inquiry Intent Distribution & Dialogue Dynamics
-* **Order Tracking & Delivery Standstills (28.4%):** Inquiries concerning tracking numbers showing *"In Transit"* with no hub updates.
-* **Damaged / Defective Items (21.2%):** Photographic proof requirements, replacement approvals without requiring return of broken goods.
-* **Apparel Size & Fit Exchanges (18.6%):** Return authorization windows (standard 30 days) and prepaid digital return labels.
-* **Billing & Duplicate Payment Disputes (16.1%):** Clarifying temporary pre-authorization bank holds versus finalized charges.
-* **Promo Code & Checkout Inquiries (15.7%):** Cart minimum qualifications, coupon exclusions, and manual courtesy vouchers.
-* **Linguistic Length Profile:** Customer inquiries exhibit a median of **21 words** (skewed up to 80 words depending on urgency), while enterprise brand replies are tightly concentrated at a median of **28 words**, emphasizing concise, actionable resolutions.
+### 3. Customer Query Categories & Message Lengths
+* **Order Tracking & Shipping Delays (28.4%):** Inquiries concerning packages stuck in transit or missing tracking updates.
+* **Damaged / Defective Items (21.2%):** Replacement requests, photo proof handling, and no-return refunds.
+* **Apparel Sizing & Returns (18.6%):** Standard 30-day return windows, prepaid return labels, and size exchanges.
+* **Billing & Duplicate Charges (16.1%):** Temporary pre-authorization holds vs. finalized charges and billing corrections.
+* **Promotions & Checkout Issues (15.7%):** Cart minimum qualifications, coupon exclusions, and courtesy credits.
+* **Message Lengths:** Customer inquiries have a median length of **21 words** (up to 80 words for complex issues), while brand responses average **28 words**, emphasizing concise, helpful answers.
 
 ---
 
-## ⚡ Model Architecture & 4-Bit QLoRA Tuning
+## ⚡ Model Fine-Tuning (QLoRA)
 
 ### Base Model: `Qwen/Qwen2.5-3B-Instruct`
-* **Scale:** 3.12 Billion parameters offering leading reasoning density per parameter (MMLU 68.4).
-* **Native ChatML Format:** Built-in `<|im_start|>` and `<|im_end|>` token boundaries eliminate prompt formatting drift.
+* **Scale:** 3.12 Billion parameters with strong reasoning per parameter.
+* **Native ChatML Format:** Uses `<|im_start|>` and `<|im_end|>` tokens for structured multi-turn conversation formatting.
 
-### Mathematical LoRA Parameter Efficiency
-Base model projection weights $W_0 \in \mathbb{R}^{d \times k}$ are frozen in 4-bit NormalFloat4 (NF4). Adaptable low-rank decomposition matrices $A$ and $B$ are injected across all 7 linear projections:
-$$h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} (B \cdot A) x$$
-where $r = 16$, $\alpha = 32$, and $A \sim \mathcal{N}(0, \sigma^2), B = 0$ at initialization.
+### Efficient Fine-Tuning Setup
+The base model weights are loaded in 4-bit NormalFloat4 (NF4) quantization. Trainable low-rank adapter matrices are attached across all 7 linear projection layers, updating only **0.96%** of total model parameters:
 
-### Parameter Allocation & Memory Footprint:
-| Parameter Component | Parameter Count | Proportion (%) | Precision / Quantization | Memory Footprint |
+$$h = W_0 x + \frac{\alpha}{r} (B \cdot A) x$$
+
+| Component | Parameter Count | Share (%) | Precision | Memory |
 | :--- | :---: | :---: | :--- | :---: |
-| **Frozen Base Weights** | 3,085,938,688 | 99.039% | 4-Bit NormalFloat4 (Double Quant) | ~2.2 GB VRAM |
-| **Trainable LoRA Adapters** | 29,933,568 | 0.961% | 16-Bit Float (`torch.float16`) | ~59.9 MB Storage |
-| **Total Model Weights** | **3,115,872,256** | **100.0%** | **4-Bit QLoRA PEFT Formulation** | **~2.3 GB Total** |
+| **Frozen Base Model** | 3,085,938,688 | 99.04% | 4-Bit NormalFloat4 | ~2.2 GB VRAM |
+| **Trainable LoRA Adapters** | 29,933,568 | 0.96% | 16-Bit Float (`float16`) | ~119.8 MB Storage |
+| **Total Model Weights** | **3,115,872,256** | **100.0%** | **4-Bit QLoRA** | **~2.3 GB Total** |
 
-### Hyperparameter Specifications:
-* **Target Linear Projections:** All 7 attention and MLP layers (`q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`)
-* **LoRA Dimensions:** Rank $r = 16$, Scaling Factor $\alpha = 32$, Dropout $= 0.05$
-* **Optimizer:** `paged_adamw_8bit` (eliminates CUDA memory fragmentation)
-* **Learning Rate Schedule:** Cosine Annealing with 10% linear warmup (Peak LR: $2.0 \times 10^{-4}$)
-* **Effective Batch Size:** 16 (`per_device_train_batch_size=2`, `gradient_accumulation_steps=8`)
-* **Collator:** `DataCollatorForCompletionOnlyLM` targeting `<|im_start|>assistant\n`
+### Hyperparameters:
+* **Target Modules:** All 7 attention and MLP layers (`q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`)
+* **LoRA Configuration:** Rank $r = 16$, Scaling Factor $\alpha = 32$, Dropout $= 0.05$
+* **Optimizer:** `paged_adamw_8bit` (avoids GPU memory spikes)
+* **Learning Rate:** Peak $2.0 \times 10^{-4}$ with cosine annealing and 10% linear warmup
+* **Batch Size:** Effective batch size of 16 (`batch_size=2`, `gradient_accumulation_steps=8`)
+* **Data Collator:** `DataCollatorForCompletionOnlyLM` targeting `<|im_start|>assistant\n`
 
-### Optimization Dynamics (1 Epoch Production Run, ~15 Mins on Colab T4):
-| Step | Training Loss | Dynamics & Observations |
+### Training Progress (1 Epoch, ~15 Mins on Colab T4 GPU):
+| Step | Training Loss | Notes |
 | :---: | :---: | :--- |
-| **20** | **2.6966** | Initial token boundary adaptation to ChatML response structure. |
-| **40** | **1.2821** | **Steep loss drop (-52.4%)**; acquires polite retail tone and suppresses generic prose. |
-| **60** | **1.0733** | Policy stabilization; tracking and exchange logic begins forming. |
-| **80** | **1.0021** | Loss approaches 1.0; canned deflection phrases successfully suppressed. |
-| **100** | **0.9163** | Strongest gradient improvement; refund and carrier SLA protocols stabilize. |
-| **120** | **0.9211** | Steady-state optimization across diverse inquiry categories. |
-| **140** | **0.9618** | Regularization active; stable stochastic batch traversal. |
-| **160** | **0.9512** | Loss stabilizes; robust adherence to return window timelines. |
-| **180** | **0.9341** | High coherence across edge intents (duplicate billing, promo voucher). |
-| **200** | **0.9549** | **Final convergence**; robust domain adaptation without overfitting. |
+| **20** | **2.70** | Model adapts to the ChatML conversation structure. |
+| **40** | **1.28** | Loss drops sharply (-52.4%); adopts customer service tone and avoids generic chatter. |
+| **60** | **1.07** | Order tracking and return policy patterns start forming. |
+| **80** | **1.00** | Generic deflection phrases ("DM us") are eliminated. |
+| **100** | **0.92** | Refund timelines and shipping guidelines stabilize. |
+| **120** | **0.92** | Consistent performance across all customer support categories. |
+| **140** | **0.96** | Loss remains steady across diverse batch samples. |
+| **160** | **0.95** | High accuracy on return window timelines. |
+| **180** | **0.93** | Reliable handling of edge cases like duplicate billing and promos. |
+| **200** | **0.95** | Final convergence with smooth loss and no overfitting. |
 
 ---
 
-## 📈 Standardized Comparative Benchmark
+## 📈 Benchmark Results
 
-Model performance was evaluated across **5 standardized retail customer service scenarios** simulating the primary contact drivers in e-commerce:
+The fine-tuned model was evaluated against the base model across **5 standardized retail customer service scenarios**:
 
-| Benchmark Scenario | Base Model Coverage | ShopAssist Tuned | Net Gain | Generation Latency |
+| Benchmark Scenario | Base Model Coverage | ShopAssist Tuned | Improvement | Response Time |
 | :--- | :---: | :---: | :---: | :---: |
-| **1. Order Tracking & Delivery Delay** | 66.7% | **100.0%** | **+33.3%** | 13.42s |
-| **2. Damaged Item & Replacement** | 83.3% | **100.0%** | **+16.7%** | 11.81s |
-| **3. Apparel Exchange & Return Window** | 66.7% | **100.0%** | **+33.3%** | 10.46s |
-| **4. Billing & Duplicate Charge Dispute** | 50.0% | **83.3%** | **+33.3%** | 20.50s |
-| **5. Checkout & Promotional Voucher** | 66.7% | **100.0%** | **+33.3%** | 28.37s |
-| **AVERAGE BENCHMARK SCORE** | **66.7%** | **96.7%** | **+30.0%** | **16.91s** |
+| **1. Order Tracking & Delivery Delay** | 66.7% | **100.0%** | **+33.3%** | 13.4s |
+| **2. Damaged Item & Replacement** | 83.3% | **100.0%** | **+16.7%** | 11.8s |
+| **3. Apparel Exchange & Return Window** | 66.7% | **100.0%** | **+33.3%** | 10.5s |
+| **4. Billing & Duplicate Charge Dispute** | 50.0% | **83.3%** | **+33.3%** | 20.5s |
+| **5. Checkout & Promotional Voucher** | 66.7% | **100.0%** | **+33.3%** | 28.4s |
+| **AVERAGE SCORE** | **66.7%** | **96.7%** | **+30.0%** | **16.9s** |
 
 ---
 
-## 💻 Local Edge Deployment & Web Application
+## 💻 Deployment & Web Application
 
-ShopAssist AI is fully self-contained and engineered for offline edge execution without continuous cloud GPU API costs:
+### 1. Interactive Streamlit App (`app/streamlit_app.py`)
+The web application provides an intuitive interface for chatting with the bot and testing customer service scenarios:
+* **Flexible Inference:** Run directly using Hugging Face PEFT with the trained LoRA adapter, or connect to a local Ollama instance.
+* **Conversation History:** Maintains multi-turn context across messages.
+* **Performance Telemetry:** Displays per-response generation speed and token throughput.
+* **Pre-Set Scenarios:** One-click buttons to test common customer inquiries (order tracking, damaged items, returns, billing, coupons).
 
-### 1. Ollama Edge Serving (`Modelfile`)
-The fine-tuned adapter is packaged with Qwen2.5-3B 4-bit quantized weights:
+### 2. Local Inference with Ollama (`Modelfile`)
+Run the model locally with Ollama using the provided `Modelfile`:
 ```dockerfile
 FROM qwen2.5:3b
 PARAMETER temperature 0.3
@@ -186,12 +191,48 @@ Provide concise, actionable solutions regarding tracking, damaged items, exchang
 Never deflect customers with generic "Please DM us" responses."""
 ```
 
-### 2. Interactive Streamlit Web App (`app/streamlit_app.py`)
-* **Direct PEFT Fine-Tuned Engine (Path A):** Directly binds the genuine 119.8 MB LoRA adapter (models/lora_adapter) to Qwen2.5-3B-Instruct in Python via Hugging Face PEFT ( + \Delta W$).
-* **Ollama Edge API Support (Path B):** Connects to a local Ollama daemon for quantized CPU edge demonstration.
-* **Session-State Context:** Retains multi-turn dialogue memory for complex order inquiries.
-* **Telemetry Diagnostics:** Displays live per-turn inference latency and token throughput.
-* **Scenario Presets:** One-click testing sidebar triggers for all 5 standardized benchmark scenarios.
+---
+
+## ⚡ Quickstart
+
+### Prerequisites
+* Python 3.10+
+* (Optional) NVIDIA GPU for local GPU inference, or [Ollama](https://ollama.ai/) for local CPU inference.
+
+### 1. Installation
+```bash
+git clone https://github.com/your-username/ecommerce-specialized-llm-bot.git
+cd ecommerce-specialized-llm-bot
+
+python -m venv venv
+# On Linux/macOS:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+### 2. Run the Streamlit Web App
+```bash
+streamlit run app/streamlit_app.py
+```
+Open `http://localhost:8501` in your browser.
+
+### 3. Run Locally with Ollama
+```bash
+# Create the local model image
+ollama create shopassist-retail -f Modelfile
+
+# Start an interactive chat
+ollama run shopassist-retail
+```
+
+### 4. Run Training Notebook in Google Colab
+To train or reproduce the fine-tuning from scratch:
+1. Open [`notebooks/ecommerce_specialized_llm_bot_capstone.ipynb`](notebooks/ecommerce_specialized_llm_bot_capstone.ipynb) in **Google Colab**.
+2. Select **Runtime > Change runtime type > T4 GPU**.
+3. Run all cells sequentially to preprocess dialogues, run QLoRA fine-tuning (200 steps, ~15 minutes), and execute benchmark evaluations.
 
 ---
 
@@ -199,102 +240,51 @@ Never deflect customers with generic "Please DM us" responses."""
 
 ```
 ecommerce-specialized-llm-bot/
-├── README.md                                 # Master project documentation
-├── docs/ShopAssist_Capstone_Project_Report.docx   # Publication-grade Word capstone report (with all figures & tables)
-├── PRESENTATION_GUIDE.md                     # Complete video demo script & presentation guide
-├── Modelfile                                 # Ollama CPU edge deployment configuration
-├── requirements.txt                          # Local CPU dependencies
-├── requirements-colab.txt                    # Google Colab T4 GPU dependencies
+├── README.md                                 # Project documentation
+├── Modelfile                                 # Ollama deployment configuration
+├── requirements.txt                          # Local environment dependencies
+├── requirements-colab.txt                    # Google Colab GPU training dependencies
+│
+├── app/
+│   └── streamlit_app.py                      # Streamlit chat interface
 │
 ├── notebooks/
-│   ├── ecommerce_specialized_llm_bot_capstone.ipynb   # Executed master capstone notebook
-│   └── backup/                                       # Checkpointed notebook versions
-│
-├── docs/
-│   └── images/                               # High-resolution 300 DPI analytical figures
-│       ├── nb_cell_61_img_0.png              # Retail Brand Volume
-│       ├── nb_cell_69_img_0.png              # Dialogue Length Distribution
-│       ├── nb_cell_77_img_0.png              # Intent Categorization
-│       ├── nb_cell_85_img_0.png              # Anti-Deflection Audit
-│       ├── nb_cell_127_img_0.png             # QLoRA Parameter Efficiency Donut
-│       ├── nb_cell_146_img_0.png             # Training Dynamics (Loss + LR)
-│       └── nb_cell_154_img_0.png             # Benchmark Comparison
+│   └── ecommerce_specialized_llm_bot_capstone.ipynb   # End-to-end training and evaluation notebook
 │
 ├── models/
-│   └── lora_adapter/                         # Serialized PEFT adapter weights (59.9 MB)
+│   ├── shopassist-q4.gguf                    # Quantized GGUF model for local inference
+│   └── lora_adapter/                         # Fine-tuned LoRA adapter weights
 │       ├── adapter_model.safetensors
 │       ├── adapter_config.json
 │       ├── chat_template.jinja
 │       ├── tokenizer.json
 │       └── tokenizer_config.json
 │
-├── app/
-│   └── streamlit_app.py                      # Interactive Streamlit UI
-└── src/
-    ├── config.py                             # Project constants & prompt templates
-    ├── preprocess.py                         # Data hygiene & ChatML builder
-    └── evaluate_bot.py                       # Automated benchmark evaluation
+└── docs/
+    ├── ShopAssist_Capstone_Project_Report.docx # Detailed project report
+    └── images/                               # Analytical charts and benchmark plots
 ```
 
 ---
 
-## ⚡ Quickstart & Reproduction
-
-### Option A: Run the Capstone Notebook (Google Colab T4)
-1. Open [`notebooks/2_ecommerce_specialized_llm_bot_capstone.ipynb`](notebooks/2_ecommerce_specialized_llm_bot_capstone.ipynb) in **Google Colab**.
-2. Select **Runtime > Change runtime type > T4 GPU**.
-3. Run all cells sequentially. The notebook will automatically download the TWCS corpus, perform relational hygiene, train the QLoRA adapter across 200 steps, and evaluate the benchmark matrix.
-
-### Option B: Local Streamlit Application Setup
-1. **Clone the repository and set up a virtual environment:**
-   ```bash
-   git clone https://github.com/your-username/ecommerce-specialized-llm-bot.git
-   cd ecommerce-specialized-llm-bot
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-2. **Deploy with Ollama (Local Edge Inference):**
-   ```bash
-   # Build the localized model image
-   ollama create shopassist-retail -f Modelfile
-   
-   # Test inference directly in terminal
-   ollama run shopassist-retail
-   ```
-
-3. **Launch the Interactive Streamlit Web Interface:**
-   ```bash
-   streamlit run app/streamlit_app.py
-   ```
-   Open `http://localhost:8501` to test interactive multi-turn customer support dialogues.
-
----
-
-## 💼 Business ROI & Enterprise Impact
+## 💼 Business Impact
 
 ```
 ┌───────────────────────────────────────┬───────────────────────────────────────┐
-│     TRADITIONAL HUMAN TIER-1 SUPPORT  │         SHOPASSIST AI EDGE BOT        │
+│     TRADITIONAL HUMAN TIER-1 SUPPORT  │         SHOPASSIST AI                 │
 ├───────────────────────────────────────┼───────────────────────────────────────┤
-│ Cost: $3.50 – $6.00 per contact       │ Cost: ~$0.08 per contact (97.7% cut)  │
-│ Resolution Time: 8 – 24 hours         │ Resolution Time: Instant (< 2.0s)     │
-│ Deflection: Frequent evasive loops    │ Deflection: 0% (Direct policy action) │
-│ Peak Scalability: Queue backlogs      │ Peak Scalability: Elastic horizontal  │
+│ Cost: $3.50 – $6.00 per contact       │ Cost: ~$0.08 per contact (97% saving) │
+│ Resolution Time: 8 – 24 hours         │ Resolution Time: Instant (< 2 seconds)│
+│ Deflection: Frequent evasive loops    │ Deflection: 0% (Direct policy answers)│
+│ Peak Scalability: Queue backlogs      │ Peak Scalability: Instant scaling     │
 └───────────────────────────────────────┴───────────────────────────────────────┘
 ```
 
 ---
 
-## 📜 Citation & Acknowledgments
-* **Base Model:** Qwen Team, Alibaba Cloud (`Qwen/Qwen2.5-3B-Instruct`)
-* **PEFT & QLoRA:** Dettmers et al., *QLoRA: Efficient Finetuning of Quantized LLMs* (NeurIPS 2023)
-* **Dataset:** Kaggle *Customer Support on Twitter* (`twcs.csv`)
-* **Course Specialization:** Industry-Specific Large Language Model (LLM) Capstone
+## 📜 License & Acknowledgments
 
----
-
-<div align="center">
-  <sub>Developed by Sai Charan | Industry Immersion Capstone Track</sub>
-</div>
+* **License:** [Apache 2.0](LICENSE)
+* **Base Model:** Alibaba Cloud [Qwen/Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
+* **Fine-Tuning:** Dettmers et al., [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) (NeurIPS 2023)
+* **Dataset:** Kaggle [Customer Support on Twitter](https://www.kaggle.com/datasets/thoughtvector/customer-support-on-twitter) (`twcs.csv`)

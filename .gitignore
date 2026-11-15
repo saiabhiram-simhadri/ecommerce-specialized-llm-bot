@@ -36,6 +36,9 @@ checkpoints/
 wandb/
 runs/
 
+# Agent helpers & scratch
+src/
+
 # OS specific
 .DS_Store
 Thumbs.db
