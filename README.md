@@ -187,6 +187,8 @@ Never deflect customers with generic "Please DM us" responses."""
 ```
 
 ### 2. Interactive Streamlit Web App (`app/streamlit_app.py`)
+* **Direct PEFT Fine-Tuned Engine (Path A):** Directly binds the genuine 119.8 MB LoRA adapter (models/lora_adapter) to Qwen2.5-3B-Instruct in Python via Hugging Face PEFT ( + \Delta W$).
+* **Ollama Edge API Support (Path B):** Connects to a local Ollama daemon for quantized CPU edge demonstration.
 * **Session-State Context:** Retains multi-turn dialogue memory for complex order inquiries.
 * **Telemetry Diagnostics:** Displays live per-turn inference latency and token throughput.
 * **Scenario Presets:** One-click testing sidebar triggers for all 5 standardized benchmark scenarios.
@@ -198,7 +200,7 @@ Never deflect customers with generic "Please DM us" responses."""
 ```
 ecommerce-specialized-llm-bot/
 ├── README.md                                 # Master project documentation
-├── ShopAssist_Capstone_Project_Report.docx   # Publication-grade Word capstone report (with all figures & tables)
+├── docs/ShopAssist_Capstone_Project_Report.docx   # Publication-grade Word capstone report (with all figures & tables)
 ├── PRESENTATION_GUIDE.md                     # Complete video demo script & presentation guide
 ├── Modelfile                                 # Ollama CPU edge deployment configuration
 ├── requirements.txt                          # Local CPU dependencies
@@ -208,7 +210,7 @@ ecommerce-specialized-llm-bot/
 │   ├── ecommerce_specialized_llm_bot_capstone.ipynb   # Executed master capstone notebook
 │   └── backup/                                       # Checkpointed notebook versions
 │
-├── reports/
+├── docs/
 │   └── images/                               # High-resolution 300 DPI analytical figures
 │       ├── nb_cell_61_img_0.png              # Retail Brand Volume
 │       ├── nb_cell_69_img_0.png              # Dialogue Length Distribution
@@ -239,7 +241,7 @@ ecommerce-specialized-llm-bot/
 ## ⚡ Quickstart & Reproduction
 
 ### Option A: Run the Capstone Notebook (Google Colab T4)
-1. Open [`notebooks/ecommerce_specialized_llm_bot_capstone.ipynb`](notebooks/ecommerce_specialized_llm_bot_capstone.ipynb) in **Google Colab**.
+1. Open [`notebooks/2_ecommerce_specialized_llm_bot_capstone.ipynb`](notebooks/2_ecommerce_specialized_llm_bot_capstone.ipynb) in **Google Colab**.
 2. Select **Runtime > Change runtime type > T4 GPU**.
 3. Run all cells sequentially. The notebook will automatically download the TWCS corpus, perform relational hygiene, train the QLoRA adapter across 200 steps, and evaluate the benchmark matrix.
 

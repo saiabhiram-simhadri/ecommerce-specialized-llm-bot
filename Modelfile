@@ -1,0 +1,36 @@
+# ==============================================================================
+# ShopAssist AI: Ollama Model Specification
+# ==============================================================================
+# Base: Mathematically merged Qwen2.5-3B + ShopAssist LoRA fine-tuned weights (Q4_K_M)
+# ==============================================================================
+
+FROM ./models/shopassist-q4.gguf
+
+TEMPLATE """{{- if .Messages }}
+{{- range $index, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $index)) 1 }}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{- else if eq .Role "system" }}<|im_start|>system
+{{ .Content }}<|im_end|>
+{{- else if eq .Role "assistant" }}<|im_start|>assistant
+{{ .Content }}<|im_end|>
+{{- end }}
+{{- if and (ne .Role "assistant") $last }}<|im_start|>assistant
+{{ end }}
+{{- end }}
+{{- else }}
+{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ end }}{{ .Response }}{{ if .Response }}<|im_end|>{{ end }}"""
+
+SYSTEM """You are ShopAssist, a specialized customer support AI for an online retail and e-commerce platform. Provide clear, empathetic, and accurate assistance for order tracking, delivery issues, returns, refunds, exchanges, and promotions. Never deflect customers with generic 'Please DM us' responses."""
+
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"

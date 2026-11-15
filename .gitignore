@@ -1,0 +1,41 @@
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Datasets
+data/csv/*.csv
+data/csv/**/*.csv
+*.csv
+
+# Model weights & checkpoints
+models/**/*.bin
+models/**/*.safetensors
+models/**/*.gguf
+*.bin
+*.safetensors
+*.gguf
+checkpoints/
+wandb/
+runs/
+
+# OS specific
+.DS_Store
+Thumbs.db
